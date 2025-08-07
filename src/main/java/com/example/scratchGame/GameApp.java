@@ -205,13 +205,22 @@ public class GameApp {
                                 checkCovered(coveredAreas, row, col, requiredCount, Direction.DIAGONAL, grid, currentSymbol))) {
                             symbolWinCombLinearNames.computeIfAbsent(currentSymbol, k -> new ArrayList<>()).add(winCombName);
                         }
-                    } else if (winComb.when() == When.same_symbols) {
-                        Integer symbolCount = symbolCounts.getOrDefault(currentSymbol, 0);
-                        Integer required = winComb.count();
-                        if (required != null && symbolCount >= required) {
-                            symbolWinCombName.merge(currentSymbol, winCombName, (existing, newVal) ->
-                                    winCombinations.get(existing).count() > winCombinations.get(newVal).count() ? existing : newVal);
-                        }
+                    }
+                }
+            }
+        }
+
+        //in better scenario, we can group.
+        for (var entryComb : winCombinations.entrySet()) {
+            var winComb = entryComb.getValue();
+            var winCombName = entryComb.getKey();
+            if (winComb.when() == When.same_symbols) {
+                for (var entry : symbolCounts.entrySet()) {
+                    String symbol = entry.getKey();
+                    int count = entry.getValue();
+                    if (winComb.count() != null && count >= winComb.count()) {
+                        symbolWinCombName.merge(symbol, winCombName, (existing, newVal) ->
+                                winCombinations.get(existing).count() > winCombinations.get(newVal).count() ? existing : newVal);
                     }
                 }
             }
